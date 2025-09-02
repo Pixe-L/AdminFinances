@@ -6,14 +6,21 @@
     const budget = ref(0);
     const error = ref('');
 
+    const emit = defineEmits(['define-budget'])
+
     const defineBudget = () => {
-        if (budget.value <= 0) {
+        if (budget.value <= 0 || budget.value === '' || budget.value === null || !budget.value) {
             error.value = 'Presupuesto no valido'
 
             setTimeout(() => {
                 error.value = '';
             }, 3000);
-        } 
+            return
+        }
+        
+        // if () return;
+
+        emit('define-budget', budget.value)
     }
 
 </script>
