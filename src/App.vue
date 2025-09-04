@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue';
 import Budget from './components/Budget.vue';
+import BudgetControl from './components/BudgetControl.vue';
 
 const budget = ref(0);
 
@@ -15,8 +16,10 @@ const defineBudget = (amount) => {
       <h1>Expense Manager</h1>
 
       <div class="header-container container shade">
-        <Budget v-if="budget === 0" @define-budget="defineBudget"/>
-        <p v-else>Valid budget</p>
+        <budget v-if="budget === 0" @define-budget="defineBudget"/>
+        
+        <!-- Budget Control -->
+        <budget-control v-else :budget="budget"/>
       </div>
 
     </header>
