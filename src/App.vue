@@ -4,9 +4,11 @@ import Budget from './components/Budget.vue';
 import BudgetControl from './components/BudgetControl.vue';
 
 const budget = ref(0);
+const available = ref(0);
 
 const defineBudget = (amount) => {
   budget.value = amount;
+  available.value = amount;
 };
 </script>
 
@@ -19,7 +21,7 @@ const defineBudget = (amount) => {
         <budget v-if="budget === 0" @define-budget="defineBudget"/>
         
         <!-- Budget Control -->
-        <budget-control v-else :budget="budget"/>
+        <budget-control v-else :budget="budget" :available="available"/>
       </div>
 
     </header>
@@ -78,6 +80,5 @@ header h1 {
   box-shadow: 0px 10px 15px -3px rgba(0,0,0,0.1);
   background-color: var(--white);
   border-radius: 1.2rem;
-  padding: 5rem;
 }
 </style>
