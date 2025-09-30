@@ -12,6 +12,14 @@ const modal = reactive({
 const budget = ref(0);
 const available = ref(0);
 
+const expense = reactive({
+  name: '',
+  amount: '',
+  category: '',
+  id: null,
+  date: Date.now()
+});
+
 const defineBudget = (amount) => {
   budget.value = amount;
   available.value = amount;
@@ -26,7 +34,7 @@ const closeModal = () => {
   modal.animate = false;
   setTimeout(() => {
     modal.show = false;
-  },300);
+  }, 300);
 }
 </script>
 
@@ -36,10 +44,10 @@ const closeModal = () => {
       <h1>Expense Manager</h1>
 
       <div class="header-container container shade">
-        <budget v-if="budget === 0" @define-budget="defineBudget"/>
-        
+        <budget v-if="budget === 0" @define-budget="defineBudget" />
+
         <!-- Budget Control -->
-        <budget-control v-else :budget="budget" :available="available"/>
+        <budget-control v-else :budget="budget" :available="available" />
       </div>
     </header>
 
@@ -48,7 +56,8 @@ const closeModal = () => {
         <img :src="iconNewBudget" alt="Icon new budget" @click="showModal">
       </div>
 
-      <Modal v-if="modal.show" @close-modal="closeModal" :modal="modal"/>
+      <Modal v-if="modal.show" @close-modal="closeModal" :modal="modal" 
+      v-model:name="expense.name" v-model:amount="expense.amount" v-model:category="expense.category"/>
     </main>
   </div>
 </template>
@@ -62,55 +71,67 @@ const closeModal = () => {
   --dark-gray: #64748b;
   --dark: #000;
 }
+
 html {
   font-size: 62.5%;
   box-sizing: border-box;
 }
+
 *,
 *:before,
 *:after {
   box-sizing: inherit;
 }
+
 body {
   font-size: 1.6rem;
   font-family: "Lato", sans-serif;
   background-color: var(--light-gray);
 }
+
 h1 {
   font-size: 4rem;
 }
+
 h2 {
   font-size: 3rem;
 }
+
 header {
   background-color: var(--blue);
 }
+
 header h1 {
   padding: 3rem 0;
   margin: 0;
   color: var(--white);
   text-align: center;
 }
+
 .container {
   width: 90%;
   max-width: 80rem;
   margin: 0 auto;
 }
+
 .header-container {
   margin-top: -5rem;
   transform: translateY(5rem);
   padding: 5rem;
 }
+
 .shade {
-  box-shadow: 0px 10px 15px -3px rgba(0,0,0,0.1);
+  box-shadow: 0px 10px 15px -3px rgba(0, 0, 0, 0.1);
   background-color: var(--white);
   border-radius: 1.2rem;
 }
+
 .budget-create {
   position: fixed;
   bottom: 5rem;
   right: 5rem;
 }
+
 .budget-create img {
   width: 5rem;
   cursor: pointer;

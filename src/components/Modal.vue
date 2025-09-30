@@ -6,6 +6,18 @@
         modal: {
             type: Object,
             required: true
+        },
+        name: {
+            type: String,
+            required: true
+        },
+        amount: {
+            type: [String, Number],
+            required: true
+        },
+        category: {
+            type: String,
+            required: true
         }
     });
 </script>
@@ -21,15 +33,15 @@
                 <legend>Add expense</legend>
                 <div class="field">
                     <label for="name">Name expense:</label>
-                    <input type="text" id="name" placeholder="Name expense">
+                    <input :value="name" type="text" id="name" placeholder="Name expense">
                 </div>
                 <div class="field">
                     <label for="amount">Name expense:</label>
-                    <input type="number" id="amount" placeholder="Add amount of expense, ex. 300">
+                    <input :value="amount" type="number" id="amount" placeholder="Add amount of expense, ex. 300">
                 </div>
                 <div class="field">
                     <label for="category">Category:</label>
-                    <select name="category" id="category">
+                    <select name="category" id="category" :value="category">
                         <option value="">-- Select --</option>
                         <option value="saving">Saving</option>
                         <option value="food">Food</option>
