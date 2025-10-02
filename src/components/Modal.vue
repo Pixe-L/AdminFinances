@@ -1,7 +1,7 @@
 <script setup>
     import closeModal from '../assets/img/cerrar.svg'
 
-    const emit = defineEmits(['close-modal']);
+    const emit = defineEmits(['close-modal', 'update:name', 'update:amount', 'update:category']);
     const props = defineProps({
         modal: {
             type: Object,
@@ -33,15 +33,17 @@
                 <legend>Add expense</legend>
                 <div class="field">
                     <label for="name">Name expense:</label>
-                    <input :value="name" type="text" id="name" placeholder="Name expense">
+                    <input :value="name" type="text" id="name" placeholder="Name expense"
+                    @input="$emit('update:name', $event.target.value)">
                 </div>
                 <div class="field">
                     <label for="amount">Name expense:</label>
-                    <input :value="amount" type="number" id="amount" placeholder="Add amount of expense, ex. 300">
+                    <input :value="amount" type="number" id="amount" placeholder="Add amount of expense, ex. 300"
+                    @input="$emit('update:amount', +$event.target.value)">
                 </div>
                 <div class="field">
                     <label for="category">Category:</label>
-                    <select name="category" id="category" :value="category">
+                    <select name="category" id="category" :value="category" @input="$emit('update:category', $event.target.value)">
                         <option value="">-- Select --</option>
                         <option value="saving">Saving</option>
                         <option value="food">Food</option>
