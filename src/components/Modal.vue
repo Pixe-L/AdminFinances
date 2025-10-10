@@ -1,5 +1,9 @@
 <script setup>
+    import {ref} from 'vue';
+    import Alert from './Alert.vue';
     import closeModal from '../assets/img/cerrar.svg'
+
+    const error = ref('');
 
     const emit = defineEmits(['close-modal', 'update:name', 'update:amount', 'update:category']);
     const props = defineProps({
@@ -20,6 +24,24 @@
             required: true
         }
     });
+    const addExpense = () => {
+        const {amount, category, name,} = props;
+        if ([amount, category, name].includes('')) {
+            error.value = 'Todos los campos son obligatorios.'
+            setTimeout(() => {
+                error.value = '';
+            }, 3000);
+            return;
+        }
+
+        if (amount <= 0) {
+            error.value = 'Cantidad no valida.'
+            setTimeout(() => {
+                error.value = '';
+            }, 3000);
+            return;
+        }
+    }
 </script>
 
 <template>
@@ -29,17 +51,20 @@
         </div>
 
         <div class="container container-form" :class="[modal.animate ? 'animate' : 'close']">
-            <form class="new-expense">
+            <form class="new-expense" @submit.prevent="addExpense">
                 <legend>Add expense</legend>
+
+                <alert v-if="error">{{ error }}</alert>
+
                 <div class="field">
                     <label for="name">Name expense:</label>
                     <input :value="name" type="text" id="name" placeholder="Name expense"
                     @input="$emit('update:name', $event.target.value)">
                 </div>
                 <div class="field">
-                    <label for="amount">Name expense:</label>
+                    <label for="amount">Amount:</label>
                     <input :value="amount" type="number" id="amount" placeholder="Add amount of expense, ex. 300"
-                    @input="$emit('update:amount', +$event.target.value)">
+                    @input="$emit('update:amount', +$event.target.value)"> //el + lo convierte en entero
                 </div>
                 <div class="field">
                     <label for="category">Category:</label>
