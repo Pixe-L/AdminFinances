@@ -4,6 +4,7 @@ import Budget from './components/Budget.vue';
 import BudgetControl from './components/BudgetControl.vue';
 import Modal from './components/Modal.vue';
 import iconNewBudget from './assets/img/nuevo-gasto.svg'
+import {idGenerator} from './helpers'
 
 const modal = reactive({
   show: false,
@@ -19,7 +20,7 @@ const expense = reactive({
   id: null,
   date: Date.now()
 });
-
+const expenses = ref([]);
 const defineBudget = (amount) => {
   budget.value = amount;
   available.value = amount;
@@ -29,13 +30,19 @@ const showModal = () => {
     modal.animate = true;
   }, 300);
   modal.show = true;
-}
+};
 const closeModal = () => {
   modal.animate = false;
   setTimeout(() => {
     modal.show = false;
   }, 300);
-}
+};
+const saveExpense = () => {
+  expenses.value.push({
+    ...expense,
+    id: idGenerator()
+  })
+};
 </script>
 
 <template>
@@ -56,7 +63,7 @@ const closeModal = () => {
         <img :src="iconNewBudget" alt="Icon new budget" @click="showModal">
       </div>
 
-      <Modal v-if="modal.show" @close-modal="closeModal" :modal="modal" 
+      <Modal v-if="modal.show" @close-modal="closeModal" @save-expense="saveExpense" :modal="modal" 
       v-model:name="expense.name" v-model:amount="expense.amount" v-model:category="expense.category"/>
     </main>
   </div>
