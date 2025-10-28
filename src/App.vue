@@ -3,6 +3,7 @@ import { ref, reactive } from 'vue';
 import Budget from './components/Budget.vue';
 import BudgetControl from './components/BudgetControl.vue';
 import Modal from './components/Modal.vue';
+import Expense from './components/Expense.vue';
 import iconNewBudget from './assets/img/nuevo-gasto.svg'
 import {idGenerator} from './helpers'
 
@@ -41,6 +42,16 @@ const saveExpense = () => {
   expenses.value.push({
     ...expense,
     id: idGenerator()
+  });
+  closeModal();
+
+  // Reset modal
+  Object.assign(expense, {
+    name: '',
+    amount: '',
+    category: '',
+    id: null,
+    date: Date.now()
   })
 };
 </script>
@@ -58,8 +69,15 @@ const saveExpense = () => {
       </div>
     </header>
 
-    <main>
-      <div class="budget-create" v-if="budget">
+    <main v-if="budget > 0">
+
+      <div class="expense-list container">
+        <h2>{{expenses.length > 0 ? 'Expenses' : 'Not expenses'}}</h2>
+
+        <expense v-for="expense in expenses" :key="expense.id" :expense="expense"/>
+      </div>
+
+      <div class="budget-create">
         <img :src="iconNewBudget" alt="Icon new budget" @click="showModal">
       </div>
 
@@ -142,5 +160,14 @@ header h1 {
 .budget-create img {
   width: 5rem;
   cursor: pointer;
+}
+
+.expense-list {
+  margin-top: 10rem;
+}
+
+.expense-list h2 {
+  font-weight: 900;
+  color: var(--dark-gray);
 }
 </style>
