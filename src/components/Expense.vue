@@ -9,13 +9,13 @@ import IconoSalud from '../assets/img/icono_salud.svg'
 import IconoSuscripciones from '../assets/img/icono_suscripciones.svg'
 
 const diccionarioIconos = {
-    ahorro: IconoAhorro,
-    comida: IconoComida,
-    casa: IconoCasa,
-    gastos: IconoGastos,
-    ocio: IconoOcio,
-    salud: IconoSalud,
-    suscripciones: IconoSuscripciones
+    saving: IconoAhorro,
+    food: IconoComida,
+    home: IconoCasa,
+    miscellaneous: IconoGastos,
+    leisure: IconoOcio,
+    health: IconoSalud,
+    subscriptions: IconoSuscripciones
 }
 
 const props = defineProps({
@@ -28,14 +28,17 @@ const props = defineProps({
 </script>
 
 <template>
-    <div class="shade">
+    <div class="expense shade">
         <div class="content">
             <img :src="diccionarioIconos[expense.category]" class="icon" alt="Icono gasto">
             <div class="details">
                 <p class="category">{{ expense.category }}</p>
                 <p class="name">{{ expense.name }}</p>
 
-                <p class="date">{{ formatDate(expense.date) }}</p>
+                <p class="date">
+                    Fecha:
+                    <span>{{ formatDate(expense.date) }}</span>
+                </p>
             </div>
         </div>
         <p class="amount">{{ formatMoney(expense.amount) }}</p>
@@ -43,4 +46,28 @@ const props = defineProps({
 </template>
 
 
-<style lang="scss" scoped></style>
+<style scoped>
+.expense {
+
+}
+
+.content {
+
+}
+
+.details p {
+
+}
+
+.category {
+
+}
+
+.name {
+
+}
+
+.date {
+
+}
+</style>
