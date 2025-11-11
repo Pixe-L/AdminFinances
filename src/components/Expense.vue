@@ -48,26 +48,55 @@ const props = defineProps({
 
 <style scoped>
 .expense {
-
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding: 5rem;
 }
 
 .content {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+}
 
+.icon {
+    width: 5rem;
 }
 
 .details p {
-
+    margin: 0 0 1rem 0;
 }
 
 .category {
-
+    color: var(--gray);
+    font-size: 1.2rem;
+    text-transform: uppercase;
+    font-weight: 900;
 }
 
 .name {
-
+    color: var(--dark-gray);
+    font-size: 2.4rem;
+    font-weight: 700;
+    cursor: pointer;
+    width: max-content;
 }
 
 .date {
+    font-size: 1.6rem;
+    font-weight: 900;
+}
 
+.date span {
+    font-weight: 400;
+    color: var(--dark-gray);
+}
+
+.amount {
+    font-size: 3rem;
+    font-weight: 900;
+    margin: 0;
 }
 </style>
