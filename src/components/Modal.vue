@@ -22,10 +22,14 @@
         category: {
             type: String,
             required: true
+        },
+        available: {
+            type: Number,
+            required: true
         }
     });
     const addExpense = () => {
-        const {amount, category, name,} = props;
+        const {amount, category, name, available} = props;
         if ([amount, category, name].includes('')) {
             error.value = 'Todos los campos son obligatorios.'
             setTimeout(() => {
@@ -36,6 +40,14 @@
 
         if (amount <= 0) {
             error.value = 'Cantidad no valida.'
+            setTimeout(() => {
+                error.value = '';
+            }, 3000);
+            return;
+        }
+
+        if (available < amount) {
+            error.value = 'Excediste la cantidad disponible de dinero.';
             setTimeout(() => {
                 error.value = '';
             }, 3000);

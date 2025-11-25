@@ -1,5 +1,5 @@
 <script setup>
-import { ref, reactive } from 'vue';
+import { ref, reactive, watch } from 'vue';
 import Budget from './components/Budget.vue';
 import BudgetControl from './components/BudgetControl.vue';
 import Modal from './components/Modal.vue';
@@ -11,8 +11,10 @@ const modal = reactive({
   show: false,
   animate: false
 });
+
 const budget = ref(0);
 const available = ref(0);
+const spent = ref(0);
 
 const expense = reactive({
   name: '',
@@ -22,22 +24,34 @@ const expense = reactive({
   date: Date.now()
 });
 const expenses = ref([]);
+
+watch(expenses, () => {
+  const totalExpense = expenses.value.reduce((total, expense) => expense.amount + total, 0);
+  spent.value = totalExpense;
+  available.value = budget.value - spent.value;
+}, {
+  deep: true
+});
+
 const defineBudget = (amount) => {
   budget.value = amount;
   available.value = amount;
 };
+
 const showModal = () => {
   setTimeout(() => {
     modal.animate = true;
   }, 300);
   modal.show = true;
 };
+
 const closeModal = () => {
   modal.animate = false;
   setTimeout(() => {
     modal.show = false;
   }, 300);
 };
+
 const saveExpense = () => {
   expenses.value.push({
     ...expense,
@@ -57,7 +71,7 @@ const saveExpense = () => {
 </script>
 
 <template>
-  <div>
+  <div :class="{set: modal.show}">
     <header>
       <h1>Expense Manager</h1>
 
@@ -65,7 +79,7 @@ const saveExpense = () => {
         <budget v-if="budget === 0" @define-budget="defineBudget" />
 
         <!-- Budget Control -->
-        <budget-control v-else :budget="budget" :available="available" />
+        <budget-control v-else :budget="budget" :available="available" :spent="spent"/>
       </div>
     </header>
 
@@ -81,7 +95,7 @@ const saveExpense = () => {
         <img :src="iconNewBudget" alt="Icon new budget" @click="showModal">
       </div>
 
-      <Modal v-if="modal.show" @close-modal="closeModal" @save-expense="saveExpense" :modal="modal" 
+      <Modal v-if="modal.show" @close-modal="closeModal" @save-expense="saveExpense" :modal="modal" :available="available"
       v-model:name="expense.name" v-model:amount="expense.amount" v-model:category="expense.category"/>
     </main>
   </div>
@@ -120,6 +134,11 @@ h1 {
 
 h2 {
   font-size: 3rem;
+}
+
+.set {
+  overflow: hidden;
+  height: 100vh;
 }
 
 header {
