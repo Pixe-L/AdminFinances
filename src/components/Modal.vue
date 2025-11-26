@@ -46,7 +46,7 @@
             return;
         }
 
-        if (available < amount) {
+        if (amount > available) {
             error.value = 'Excediste la cantidad disponible de dinero.';
             setTimeout(() => {
                 error.value = '';

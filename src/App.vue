@@ -5,7 +5,7 @@ import BudgetControl from './components/BudgetControl.vue';
 import Modal from './components/Modal.vue';
 import Expense from './components/Expense.vue';
 import iconNewBudget from './assets/img/nuevo-gasto.svg'
-import {idGenerator} from './helpers'
+import { idGenerator } from './helpers'
 
 const modal = reactive({
   show: false,
@@ -33,6 +33,14 @@ watch(expenses, () => {
   deep: true
 });
 
+watch(modal, () => {
+  if (!modal.show) {
+    resetExpense();
+  }
+}, {
+  deep: true
+});
+
 const defineBudget = (amount) => {
   budget.value = amount;
   available.value = amount;
@@ -53,12 +61,21 @@ const closeModal = () => {
 };
 
 const saveExpense = () => {
-  expenses.value.push({
-    ...expense,
-    id: idGenerator()
-  });
+  if (expense.id) {
+    const {id} = expense;
+    const i = expenses.value.findIndex((expense => expense.id === id));
+    expenses.value[i] = {...expense};
+  } else {
+    expenses.value.push({
+      ...expense,
+      id: idGenerator()
+    });
+  }
   closeModal();
+  resetExpense();
+};
 
+const resetExpense = () => {
   // Reset modal
   Object.assign(expense, {
     name: '',
@@ -66,12 +83,18 @@ const saveExpense = () => {
     category: '',
     id: null,
     date: Date.now()
-  })
+  });
 };
+
+const selectExpense = (id) => {
+  const expenseEdit = expenses.value.filter(expense => expense.id === id)[0]
+  Object.assign(expense, expenseEdit);
+  showModal();
+}
 </script>
 
 <template>
-  <div :class="{set: modal.show}">
+  <div :class="{ set: modal.show }">
     <header>
       <h1>Expense Manager</h1>
 
@@ -79,24 +102,25 @@ const saveExpense = () => {
         <budget v-if="budget === 0" @define-budget="defineBudget" />
 
         <!-- Budget Control -->
-        <budget-control v-else :budget="budget" :available="available" :spent="spent"/>
+        <budget-control v-else :budget="budget" :available="available" :spent="spent" />
       </div>
     </header>
 
     <main v-if="budget > 0">
 
       <div class="expense-list container">
-        <h2>{{expenses.length > 0 ? 'Expenses' : 'Not expenses'}}</h2>
+        <h2>{{ expenses.length > 0 ? 'Expenses' : 'Not expenses' }}</h2>
 
-        <expense v-for="expense in expenses" :key="expense.id" :expense="expense"/>
+        <expense v-for="expense in expenses" :key="expense.id" :expense="expense" @select-expense="selectExpense" />
       </div>
 
       <div class="budget-create">
         <img :src="iconNewBudget" alt="Icon new budget" @click="showModal">
       </div>
 
-      <Modal v-if="modal.show" @close-modal="closeModal" @save-expense="saveExpense" :modal="modal" :available="available"
-      v-model:name="expense.name" v-model:amount="expense.amount" v-model:category="expense.category"/>
+      <Modal v-if="modal.show" @close-modal="closeModal" @save-expense="saveExpense" :modal="modal"
+        :available="available" v-model:name="expense.name" v-model:amount="expense.amount"
+        v-model:category="expense.category" />
     </main>
   </div>
 </template>
