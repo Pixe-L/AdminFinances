@@ -91,6 +91,13 @@ const selectExpense = (id) => {
   Object.assign(expense, expenseEdit);
   showModal();
 }
+
+const deleteExpense = (id) => {
+  if (confirm('Are you sure you want to delete this expense?')) {
+    expenses.value = expenses.value.filter(expense => expense.id !== id);
+    closeModal();
+  }
+};
 </script>
 
 <template>
@@ -118,8 +125,8 @@ const selectExpense = (id) => {
         <img :src="iconNewBudget" alt="Icon new budget" @click="showModal">
       </div>
 
-      <Modal v-if="modal.show" @close-modal="closeModal" @save-expense="saveExpense" :modal="modal"
-        :available="available" v-model:name="expense.name" v-model:amount="expense.amount"
+      <Modal v-if="modal.show" @delete-expense="deleteExpense" @close-modal="closeModal" @save-expense="saveExpense" :modal="modal"
+        :available="available" :id="expense.id" v-model:name="expense.name" v-model:amount="expense.amount"
         v-model:category="expense.category" />
     </main>
   </div>

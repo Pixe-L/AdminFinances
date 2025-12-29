@@ -1,51 +1,67 @@
 <script setup>
-    import {ref} from 'vue';
-    import Alert from './Alert.vue';
-    import closeModal from '../assets/img/cerrar.svg'
+import { ref } from 'vue';
+import Alert from './Alert.vue';
+import closeModal from '../assets/img/cerrar.svg'
 
-    const error = ref('');
+const error = ref('');
 
-    const emit = defineEmits(['close-modal', 'save-expense', 'update:name', 'update:amount', 'update:category']);
-    const props = defineProps({
-        modal: {
-            type: Object,
-            required: true
-        },
-        name: {
-            type: String,
-            required: true
-        },
-        amount: {
-            type: [String, Number],
-            required: true
-        },
-        category: {
-            type: String,
-            required: true
-        },
-        available: {
-            type: Number,
-            required: true
-        }
-    });
-    const addExpense = () => {
-        const {amount, category, name, available} = props;
-        if ([amount, category, name].includes('')) {
-            error.value = 'Todos los campos son obligatorios.'
+const emit = defineEmits(['close-modal', 'save-expense', 'update:name', 'update:amount', 'update:category', 'delete-expense']);
+const props = defineProps({
+    modal: {
+        type: Object,
+        required: true
+    },
+    name: {
+        type: String,
+        required: true
+    },
+    amount: {
+        type: [String, Number],
+        required: true
+    },
+    category: {
+        type: String,
+        required: true
+    },
+    available: {
+        type: Number,
+        required: true
+    },
+    id: {
+        type: [String, null],
+        required: true
+    }
+});
+
+const old = props.amount;
+
+const addExpense = () => {
+    const { amount, category, name, available, id } = props;
+    if ([amount, category, name].includes('')) {
+        error.value = 'Todos los campos son obligatorios.'
+        setTimeout(() => {
+            error.value = '';
+        }, 3000);
+        return;
+    }
+
+    if (amount <= 0) {
+        error.value = 'Cantidad no valida.'
+        setTimeout(() => {
+            error.value = '';
+        }, 3000);
+        return;
+    }
+
+    if (id) {
+        if (amount > old + available) {
+            error.value = 'Excediste la cantidad disponible de dinero.';
             setTimeout(() => {
                 error.value = '';
             }, 3000);
             return;
         }
-
-        if (amount <= 0) {
-            error.value = 'Cantidad no valida.'
-            setTimeout(() => {
-                error.value = '';
-            }, 3000);
-            return;
-        }
-
+    } else {
         if (amount > available) {
             error.value = 'Excediste la cantidad disponible de dinero.';
             setTimeout(() => {
@@ -53,9 +69,10 @@
             }, 3000);
             return;
         }
-
-        emit('save-expense');
     }
+
+    emit('save-expense');
+}
 </script>
 
 <template>
@@ -66,23 +83,24 @@
 
         <div class="container container-form" :class="[modal.animate ? 'animate' : 'close']">
             <form class="new-expense" @submit.prevent="addExpense">
-                <legend>Add expense</legend>
+                <legend>{{ id ? 'Edit expense' : 'Add expense' }}</legend>
 
                 <alert v-if="error">{{ error }}</alert>
 
                 <div class="field">
                     <label for="name">Name expense:</label>
                     <input :value="name" type="text" id="name" placeholder="Name expense"
-                    @input="$emit('update:name', $event.target.value)">
+                        @input="$emit('update:name', $event.target.value)">
                 </div>
                 <div class="field">
                     <label for="amount">Amount:</label>
                     <input :value="amount" type="number" id="amount" placeholder="Add amount of expense, ex. 300"
-                    @input="$emit('update:amount', +$event.target.value)"> //el + lo convierte en entero
+                        @input="$emit('update:amount', +$event.target.value)"> //el + lo convierte en entero
                 </div>
                 <div class="field">
                     <label for="category">Category:</label>
-                    <select name="category" id="category" :value="category" @input="$emit('update:category', $event.target.value)">
+                    <select name="category" id="category" :value="category"
+                        @input="$emit('update:category', $event.target.value)">
                         <option value="">-- Select --</option>
                         <option value="saving">Saving</option>
                         <option value="food">Food</option>
@@ -94,8 +112,11 @@
                     </select>
                 </div>
 
-                <input type="submit" value="Add Expense">
+                <input type="submit" :value="id ? 'Edit Expense' : 'Add Expense'">
             </form>
+            <button type="button" class="btn-delete" v-if="id" @click="$emit('delete-expense', id)">
+                Delete expense
+            </button>
         </div>
     </div>
 
@@ -111,42 +132,51 @@
     bottom: 0;
     left: 0;
 }
+
 .closed-modal {
     position: absolute;
     right: 3rem;
     top: 3rem;
 }
-.closed-modal  img {
+
+.closed-modal img {
     width: 3rem;
     cursor: pointer;
 }
+
 .container-form {
     transition-property: all;
     transition-duration: 300ms;
     transition-timing-function: ease-in;
     opacity: 0;
 }
+
 .container-form.animate {
     opacity: 1;
 }
+
 .container-form.close {
     opacity: 0;
 }
+
 .new-expense {
     display: grid;
     gap: 2rem;
     margin: 10rem auto 0 auto;
 }
+
 .new-expense legend {
     text-align: center;
     color: var(--white);
     font-size: 3rem;
     font-weight: 700;
 }
+
 .field {
     display: grid;
     gap: 2rem;
 }
+
 .new-expense input,
 .new-expense select {
     background-color: var(--light-gray);
@@ -155,17 +185,34 @@
     border: none;
     font-size: 2.2rem;
 }
+
 .new-expense label {
     color: var(--white);
     font-size: 3rem;
 }
+
 .new-expense input[type="submit"] {
     background-color: var(--blue);
     cursor: pointer;
     color: var(--white);
     transition: .5s;
 }
+
 .new-expense input[type="submit"]:hover {
     background-color: #185fd1;
+}
+
+.btn-delete {
+    margin-top: 10rem;
+    width: 100%;
+    background-color: #db2777;
+    border: none;
+    padding: 1rem;
+    border-radius: .5rem;
+    color: var(--white);
+    transition: background-color  0.5s ease;
+    font-size: 1.5rem;
+    font-weight: 900;
+    cursor: pointer;
 }
 </style>
