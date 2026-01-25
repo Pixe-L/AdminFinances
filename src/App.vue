@@ -1,44 +1,73 @@
 <script setup>
-import { ref, reactive, watch } from 'vue';
-import Budget from './components/Budget.vue';
-import BudgetControl from './components/BudgetControl.vue';
-import Modal from './components/Modal.vue';
-import Expense from './components/Expense.vue';
-import iconNewBudget from './assets/img/nuevo-gasto.svg'
-import { idGenerator } from './helpers'
+import { ref, reactive, watch, computed, onMounted } from "vue";
+import Budget from "./components/Budget.vue";
+import BudgetControl from "./components/BudgetControl.vue";
+import Modal from "./components/Modal.vue";
+import Expense from "./components/Expense.vue";
+import Filters from "./components/Filters.vue";
+import iconNewBudget from "./assets/img/nuevo-gasto.svg";
+import { idGenerator } from "./helpers";
 
 const modal = reactive({
   show: false,
-  animate: false
+  animate: false,
 });
 
 const budget = ref(0);
 const available = ref(0);
 const spent = ref(0);
+const filter = ref("");
 
 const expense = reactive({
-  name: '',
-  amount: '',
-  category: '',
+  name: "",
+  amount: "",
+  category: "",
   id: null,
-  date: Date.now()
+  date: Date.now(),
 });
 const expenses = ref([]);
 
-watch(expenses, () => {
-  const totalExpense = expenses.value.reduce((total, expense) => expense.amount + total, 0);
-  spent.value = totalExpense;
-  available.value = budget.value - spent.value;
-}, {
-  deep: true
+watch(
+  expenses,
+  () => {
+    const totalExpense = expenses.value.reduce(
+      (total, expense) => expense.amount + total,
+      0,
+    );
+    spent.value = totalExpense;
+    available.value = budget.value - spent.value;
+    localStorage.setItem("expenses", JSON.stringify(expenses.value));
+  },
+  {
+    deep: true,
+  },
+);
+
+watch(
+  modal,
+  () => {
+    if (!modal.show) {
+      resetExpense();
+    }
+  },
+  {
+    deep: true,
+  },
+);
+
+watch(budget, () => {
+  localStorage.setItem("budget", budget.value ?? 0);
 });
 
-watch(modal, () => {
-  if (!modal.show) {
-    resetExpense();
+onMounted(() => {
+  const budgetLS = Number(localStorage.getItem("budget")) ?? 0;
+  if (budgetLS > 0) {
+    budget.value = budgetLS;
+    available.value = budgetLS;
   }
-}, {
-  deep: true
+
+  const expensesLS = JSON.parse(localStorage.getItem("expenses")) ?? [];
+  expenses.value = expensesLS;
 });
 
 const defineBudget = (amount) => {
@@ -62,13 +91,13 @@ const closeModal = () => {
 
 const saveExpense = () => {
   if (expense.id) {
-    const {id} = expense;
-    const i = expenses.value.findIndex((expense => expense.id === id));
-    expenses.value[i] = {...expense};
+    const { id } = expense;
+    const i = expenses.value.findIndex((expense) => expense.id === id);
+    expenses.value[i] = { ...expense };
   } else {
     expenses.value.push({
       ...expense,
-      id: idGenerator()
+      id: idGenerator(),
     });
   }
   closeModal();
@@ -78,26 +107,35 @@ const saveExpense = () => {
 const resetExpense = () => {
   // Reset modal
   Object.assign(expense, {
-    name: '',
-    amount: '',
-    category: '',
+    name: "",
+    amount: "",
+    category: "",
     id: null,
-    date: Date.now()
+    date: Date.now(),
   });
 };
 
 const selectExpense = (id) => {
-  const expenseEdit = expenses.value.filter(expense => expense.id === id)[0]
+  const expenseEdit = expenses.value.filter((expense) => expense.id === id)[0];
   Object.assign(expense, expenseEdit);
   showModal();
-}
+};
 
 const deleteExpense = (id) => {
-  if (confirm('Are you sure you want to delete this expense?')) {
-    expenses.value = expenses.value.filter(expense => expense.id !== id);
+  if (confirm("Are you sure you want to delete this expense?")) {
+    expenses.value = expenses.value.filter((expense) => expense.id !== id);
     closeModal();
   }
 };
+
+const filteredExpenses = computed(() => {
+  if (filter.value) {
+    return expenses.value.filter(
+      (expense) => expense.category === filter.value,
+    );
+  }
+  return expenses.value;
+});
 </script>
 
 <template>
@@ -105,29 +143,49 @@ const deleteExpense = (id) => {
     <header>
       <h1>Expense Manager</h1>
 
-      <div class="header-container container shade">
+      <div class="header-container containers shade">
         <budget v-if="budget === 0" @define-budget="defineBudget" />
 
         <!-- Budget Control -->
-        <budget-control v-else :budget="budget" :available="available" :spent="spent" />
+        <budget-control
+          v-else
+          :budget="budget"
+          :available="available"
+          :spent="spent"
+        />
       </div>
     </header>
 
     <main v-if="budget > 0">
+      <filters v-if="expenses.length !== 0" v-model:filter="filter" />
 
-      <div class="expense-list container">
-        <h2>{{ expenses.length > 0 ? 'Expenses' : 'Not expenses' }}</h2>
+      <div class="expense-list containers">
+        <h2>{{ filteredExpenses.length > 0 ? "Expenses" : "Not expenses" }}</h2>
 
-        <expense v-for="expense in expenses" :key="expense.id" :expense="expense" @select-expense="selectExpense" />
+        <expense
+          v-for="expense in filteredExpenses"
+          :key="expense.id"
+          :expense="expense"
+          @select-expense="selectExpense"
+        />
       </div>
 
       <div class="budget-create">
-        <img :src="iconNewBudget" alt="Icon new budget" @click="showModal">
+        <img :src="iconNewBudget" alt="Icon new budget" @click="showModal" />
       </div>
 
-      <Modal v-if="modal.show" @delete-expense="deleteExpense" @close-modal="closeModal" @save-expense="saveExpense" :modal="modal"
-        :available="available" :id="expense.id" v-model:name="expense.name" v-model:amount="expense.amount"
-        v-model:category="expense.category" />
+      <Modal
+        v-if="modal.show"
+        @delete-expense="deleteExpense"
+        @close-modal="closeModal"
+        @save-expense="saveExpense"
+        :modal="modal"
+        :available="available"
+        :id="expense.id"
+        v-model:name="expense.name"
+        v-model:amount="expense.amount"
+        v-model:category="expense.category"
+      />
     </main>
   </div>
 </template>
@@ -183,10 +241,11 @@ header h1 {
   text-align: center;
 }
 
-.container {
+.containers {
   width: 90%;
   max-width: 80rem;
   margin: 0 auto;
+  padding: 5rem;
 }
 
 .header-container {
@@ -210,10 +269,6 @@ header h1 {
 .budget-create img {
   width: 5rem;
   cursor: pointer;
-}
-
-.expense-list {
-  margin-top: 10rem;
 }
 
 .expense-list h2 {
