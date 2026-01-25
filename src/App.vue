@@ -67,7 +67,9 @@ onMounted(() => {
   }
 
   const expensesLS = JSON.parse(localStorage.getItem("expenses")) ?? [];
-  expenses.value = expensesLS;
+  if (expensesLS.length > 0) {
+    expenses.value = expensesLS;
+  }
 });
 
 const defineBudget = (amount) => {
@@ -136,6 +138,16 @@ const filteredExpenses = computed(() => {
   }
   return expenses.value;
 });
+
+const resetApp = () => {
+  if (confirm("Are you sure you want to reset the app?")) {
+    budget.value = 0;
+    expenses.value = [];
+    available.value = 0;
+    spent.value = 0;
+    localStorage.clear();
+  }
+};
 </script>
 
 <template>
@@ -152,6 +164,7 @@ const filteredExpenses = computed(() => {
           :budget="budget"
           :available="available"
           :spent="spent"
+          @reset-app="resetApp"
         />
       </div>
     </header>
